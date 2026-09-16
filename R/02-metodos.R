@@ -103,6 +103,61 @@ ajustar_mm <- function(y, k) {
 
 
 
+# SUAVIZAMIENTO EXPONENCIAL SIMPLE
+
+ajustar_ses <- function(y, alpha) {
+  
+  stopifnot(is.numeric(y))
+  stopifnot(length(alpha) == 1)
+  
+  if (alpha <= 0 || alpha >= 1) {
+    stop("alpha debe estar entre 0 y 1.")
+  }
+  
+  if (any(is.na(y))) {
+    stop("La serie contiene valores faltantes.")
+  }
+  
+  if (length(y) < 2) {
+    stop("Se necesitan al menos 2 observaciones.")
+  }
+  
+  T <- length(y)
+  
+  yhat <- rep(NA_real_, T)
+  
+  yhat[2] <- y[1]
+  
+  if (T > 2) {
+    
+    for (t in 2:(T - 1)) {
+      
+      yhat[t + 1] <- alpha * y[t] +
+        (1 - alpha) * yhat[t]
+    }
+  }
+  
+  pronosticar <- function(h) {
+    
+    stopifnot(length(h) == 1, h >= 1, h == as.integer(h))
+    
+    ultimo_pronostico <- alpha * y[T] +
+      (1 - alpha) * yhat[T]
+    
+    rep(ultimo_pronostico, h)
+  }
+  
+  return(
+    list(
+      yhat = yhat,
+      pronosticar = pronosticar,
+      parametros = list(alpha = alpha)
+    )
+  )
+}
+
+
+
 
 
 
