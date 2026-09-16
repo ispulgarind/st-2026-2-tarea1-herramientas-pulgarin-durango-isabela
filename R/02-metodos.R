@@ -42,3 +42,84 @@ ajustar_media <- function(y) {
     )
   )
 }
+
+
+
+# MEDIA MÓVIL
+
+ajustar_mm <- function(y, k) {
+  
+  stopifnot(is.numeric(y))
+  stopifnot(length(k) == 1, k >= 2, k == as.integer(k))
+  
+  if (any(is.na(y))) {
+    stop("La serie contiene valores faltantes.")
+  }
+  
+  T <- length(y)
+  
+  if (k > T) {
+    stop("La ventana k no puede ser mayor que la longitud de la serie.")
+  }
+  
+  yhat <- rep(NA_real_, T)
+  
+  suma <- sum(y[1:k])
+  
+  if (k < T) {
+    yhat[k + 1] <- suma / k
+  }
+  
+  if (T > k + 1) {
+    
+    for (t in (k + 1):(T - 1)) {
+      
+      suma <- suma - y[t - k]
+      
+      suma <- suma + y[t]
+      
+      yhat[t + 1] <- suma / k
+    }
+  }
+  
+  # Pronósticos fuera de la muestra
+  pronosticar <- function(h) {
+    
+    stopifnot(length(h) == 1, h >= 1, h == as.integer(h))
+    
+    ultimo_mm <- mean(y[(T - k + 1):T])
+    
+    rep(ultimo_mm, h)
+  }
+  
+  return(
+    list(
+      yhat = yhat,
+      pronosticar = pronosticar,
+      parametros = list(k = k)
+    )
+  )
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
