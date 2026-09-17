@@ -270,16 +270,199 @@ ajustar_dmm <- function(y, k) {
 }
 
 
+# Función auxiliar para calcular la información estadística de una regresión por mínimos cuadrados
+
+resumen_regresion <- function(X, y, residuos) {
+  
+  T <- length(y)
+  
+  XtX <- crossprod(X)
+  
+  XtX_inv <- solve(XtX)
+  
+  p <- ncol(X)
+  sigma2 <- sum(residuos^2) / (T - p)
+  
+  # Matriz de varianza ordinaria de los coeficientes
+  var_ordinaria <- sigma2 * XtX_inv
+  
+  #Error estándar ordinario
+  se_ordinario <- sqrt(diag(var_ordinaria))
+  
+  
+  # ERROR ESTÁNDAR ROBUSTO HAC
+  
+  # Número de rezagos para el núcleo de Bartlett
+  L <- floor(4 * (T / 100)^(2 / 9))
+  
+  S <- matrix(0, nrow = p, ncol = p)
+  
+  # Rezago 0
+  for (t in 1:T) {
+    xt <- X[t, ]
+    S <- S + residuos[t]^2 * tcrossprod(xt)
+  }
+  
+  # Demás rezagos
+  if (L > 0) {
+    
+    for (h in 1:L) {
+      
+      # Peso del núcleo de Bartlett
+      peso <- 1 - h / (L + 1)
+      
+      for (t in (h + 1):T) {
+        
+        xt <- X[t, ]
+        xh <- X[t - h, ]
+        
+        S <- S +
+          peso * residuos[t] * residuos[t - h] *
+          (tcrossprod(xt, xh) + tcrossprod(xh, xt))
+      }
+    }
+  }
+  
+  # Matriz de varianza robusta
+  var_robusta <- XtX_inv %*% S %*% XtX_inv
+  
+  # Errores estándar robustos
+  se_robusto <- sqrt(diag(var_robusta))
+  
+  
+  # ESTADÍSTICO t Y VALOR p
+  
+  beta <- solve(XtX, crossprod(X, y))
+  
+  t_ordinario <- beta / se_ordinario
+  t_robusto <- beta / se_robusto
+  
+  p_robusto <- 2 * pt(
+    -abs(t_robusto),
+    df = T - p
+  )
+  
+  
+  # R2
+  
+  y_ajustado <- X %*% beta
+  
+  suma_total <- sum((y - mean(y))^2)
+  suma_residuos <- sum(residuos^2)
+  
+  R2 <- 1 - suma_residuos / suma_total
+  
+  
+  # DURBIN-WATSON
+  
+  DW <- sum(diff(residuos)^2) / sum(residuos^2)
+  
+  
+  # Tabla de coeficientes
+  tabla <- data.frame(
+    estimacion = as.numeric(beta),
+    se_ordinario = se_ordinario,
+    se_robusto = se_robusto,
+    t = t_robusto,
+    valor_p = p_robusto
+  )
+  
+  return(
+    list(
+      beta = as.numeric(beta),
+      tabla = tabla,
+      R2 = R2,
+      sigma2 = sigma2,
+      DW = DW,
+      rezagos_HAC = L,
+      residuos = residuos,
+      y_ajustado = as.numeric(y_ajustado)
+    )
+  )
+}
 
 
+#AJUSTAR TENDENCIA
 
-
-
-
-
-
-
-
+ajustar_tendencia <- function(y, tipo) {
+  
+  stopifnot(is.numeric(y))
+  stopifnot(length(tipo) == 1)
+  
+  if (any(is.na(y))) {
+    stop("La serie contiene valores faltantes.")
+  }
+  
+  if (!tipo %in% c("lineal", "cuadratica", "exponencial")) {
+    stop("El tipo debe ser 'lineal', 'cuadratica' o 'exponencial'.")
+  }
+  
+  # Número de observaciones
+  T <- length(y)
+  
+  if (T < 3) {
+    stop("Se necesitan al menos 3 observaciones.")
+  }
+  
+  
+  # TENDENCIA LINEAL
+  
+  if (tipo == "lineal") {
+    
+    t <- 1:T
+    
+    X <- cbind(
+      1,
+      t
+    )
+    
+    # Estimar los coeficientes
+    beta <- solve(
+      crossprod(X),
+      crossprod(X, y)
+    )
+    
+    yhat <- as.numeric(X %*% beta)
+    
+    residuos <- y - yhat
+    
+    resumen <- resumen_regresion(
+      X,
+      y,
+      residuos
+    )
+    
+    pronosticar <- function(h) {
+      
+      stopifnot(
+        length(h) == 1,
+        h >= 1,
+        h == as.integer(h)
+      )
+      
+      t_futuro <- T + (1:h)
+      
+      pronosticos <- beta[1] + beta[2] * t_futuro
+      
+      return(as.numeric(pronosticos))
+    }
+    
+    return(
+      list(
+        yhat = yhat,
+        pronosticar = pronosticar,
+        parametros = list(
+          tipo = "lineal",
+          coeficientes = resumen$tabla,
+          R2 = resumen$R2,
+          sigma2 = resumen$sigma2,
+          DW = resumen$DW,
+          rezagos_HAC = resumen$rezagos_HAC
+        )
+      )
+    )
+  }
+}
 
 
 
