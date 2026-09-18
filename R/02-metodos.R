@@ -360,11 +360,12 @@ resumen_regresion <- function(X, y, residuos) {
   
   # Tabla de coeficientes
   tabla <- data.frame(
+    coeficiente = paste0("beta_", 0:(p - 1)),
     estimacion = as.numeric(beta),
     se_ordinario = se_ordinario,
     se_robusto = se_robusto,
-    t = t_robusto,
-    valor_p = p_robusto
+    t = as.numeric(t_robusto),
+    valor_p = as.numeric(p_robusto)
   )
   
   return(
@@ -462,11 +463,68 @@ ajustar_tendencia <- function(y, tipo) {
       )
     )
   }
+  
+  # TENDENCIA CUADRÁTICA
+  
+  if (tipo == "cuadratica") {
+    
+    t <- 1:T
+    
+    X <- cbind(
+      1,
+      t,
+      t^2
+    )
+    
+    # Estimar los coeficientes
+    beta <- solve(
+      crossprod(X),
+      crossprod(X, y)
+    )
+    
+    yhat <- as.numeric(X %*% beta)
+    
+    residuos <- y - yhat
+    
+    resumen <- resumen_regresion(
+      X,
+      y,
+      residuos
+    )
+    
+    pronosticar <- function(h) {
+      
+      stopifnot(
+        length(h) == 1,
+        h >= 1,
+        h == as.integer(h)
+      )
+      
+      t_futuro <- T + (1:h)
+      
+      pronosticos <- beta[1] +
+        beta[2] * t_futuro +
+        beta[3] * t_futuro^2
+      
+      return(as.numeric(pronosticos))
+    }
+    
+    return(
+      list(
+        yhat = yhat,
+        pronosticar = pronosticar,
+        parametros = list(
+          tipo = "cuadratica",
+          coeficientes = resumen$tabla,
+          R2 = resumen$R2,
+          sigma2 = resumen$sigma2,
+          DW = resumen$DW,
+          rezagos_HAC = resumen$rezagos_HAC
+        )
+      )
+    )
+  }
 }
-
-
-
-
 
 
 
