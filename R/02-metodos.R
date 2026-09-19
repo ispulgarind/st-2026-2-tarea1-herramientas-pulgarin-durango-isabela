@@ -464,7 +464,9 @@ ajustar_tendencia <- function(y, tipo, corregir_sesgo = FALSE) {
           R2 = resumen$R2,
           sigma2 = resumen$sigma2,
           DW = resumen$DW,
-          rezagos_HAC = resumen$rezagos_HAC
+          rezagos_HAC = resumen$rezagos_HAC,
+          residuos = resumen$residuos,
+          y_ajustado = resumen$y_ajustado
         )
       )
     )
@@ -525,7 +527,9 @@ ajustar_tendencia <- function(y, tipo, corregir_sesgo = FALSE) {
           R2 = resumen$R2,
           sigma2 = resumen$sigma2,
           DW = resumen$DW,
-          rezagos_HAC = resumen$rezagos_HAC
+          rezagos_HAC = resumen$rezagos_HAC,
+          residuos = resumen$residuos,
+          y_ajustado = resumen$y_ajustado
         )
       )
     )
@@ -610,13 +614,103 @@ ajustar_tendencia <- function(y, tipo, corregir_sesgo = FALSE) {
           R2 = resumen$R2,
           sigma2 = resumen$sigma2,
           DW = resumen$DW,
-          rezagos_HAC = resumen$rezagos_HAC
+          rezagos_HAC = resumen$rezagos_HAC,
+          residuos = resumen$residuos,
+          y_ajustado = resumen$y_ajustado
         )
       )
     )
   }
 }
 
+
+
+# HOLT LINEAL
+
+ajustar_holt <- function(y, alpha, beta) {
+  
+  stopifnot(is.numeric(y))
+  
+  stopifnot(length(alpha) == 1)
+  stopifnot(length(beta) == 1)
+  
+  if (alpha <= 0 || alpha >= 1) {
+    stop("alpha debe estar entre 0 y 1.")
+  }
+  
+  if (beta <= 0 || beta >= 1) {
+    stop("beta debe estar entre 0 y 1.")
+  }
+  
+  if (any(is.na(y))) {
+    stop("La serie contiene valores faltantes.")
+  }
+  
+  if (length(y) < 2) {
+    stop("Se necesitan al menos 2 observaciones.")
+  }
+  
+  T <- length(y)
+  
+  
+  # Nivel inicial
+  L <- rep(NA_real_, T)
+  
+  # Pendiente inicial
+  b <- rep(NA_real_, T)
+  
+  L[1] <- y[1]
+  b[1] <- 0
+  
+  
+  yhat <- rep(NA_real_, T)
+  
+  for (t in 2:T) {
+    
+    yhat[t] <- L[t - 1] + b[t - 1]
+    
+    L[t] <- alpha * y[t] +
+      (1 - alpha) * yhat[t]
+    
+    b[t] <- beta * (L[t] - L[t - 1]) +
+      (1 - beta) * b[t - 1]
+  }
+  
+  
+  pronosticar <- function(h) {
+    
+    stopifnot(
+      length(h) == 1,
+      h >= 1,
+      h == as.integer(h)
+    )
+    
+    pronosticos <- numeric(h)
+    
+    for (j in 1:h) {
+      
+      pronosticos[j] <- L[T] + b[T] * j
+    }
+    
+    return(pronosticos)
+  }
+  
+  
+  return(
+    list(
+      yhat = yhat,
+      pronosticar = pronosticar,
+      parametros = list(
+        alpha = alpha,
+        beta = beta,
+        L = L,
+        b = b,
+        nivel_final = L[T],
+        pendiente_final = b[T]
+      )
+    )
+  )
+}
 
 
 
