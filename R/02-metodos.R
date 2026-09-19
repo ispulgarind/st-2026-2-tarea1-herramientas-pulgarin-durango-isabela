@@ -272,7 +272,7 @@ ajustar_dmm <- function(y, k) {
 
 # Función auxiliar para calcular la información estadística de una regresión por mínimos cuadrados
 
-resumen_regresion <- function(X, y, residuos) {
+resumen_regresion <- function(X, y, residuos, nombres = NULL) {
   
   T <- length(y)
   
@@ -358,9 +358,14 @@ resumen_regresion <- function(X, y, residuos) {
   DW <- sum(diff(residuos)^2) / sum(residuos^2)
   
   
+  # Nombres de los coeficientes
+  if (is.null(nombres)) {
+    nombres <- paste0("beta_", 0:(p - 1))
+  }
+  
   # Tabla de coeficientes
   tabla <- data.frame(
-    coeficiente = paste0("beta_", 0:(p - 1)),
+    coeficiente = nombres,
     estimacion = as.numeric(beta),
     se_ordinario = se_ordinario,
     se_robusto = se_robusto,
@@ -385,10 +390,11 @@ resumen_regresion <- function(X, y, residuos) {
 
 #AJUSTAR TENDENCIA
 
-ajustar_tendencia <- function(y, tipo) {
+ajustar_tendencia <- function(y, tipo, corregir_sesgo = FALSE) {
   
   stopifnot(is.numeric(y))
   stopifnot(length(tipo) == 1)
+  stopifnot(length(corregir_sesgo) == 1)
   
   if (any(is.na(y))) {
     stop("La serie contiene valores faltantes.")
@@ -524,8 +530,92 @@ ajustar_tendencia <- function(y, tipo) {
       )
     )
   }
+  
+  
+  # TENDENCIA EXPONENCIAL
+  
+  if (tipo == "exponencial") {
+    
+    if (any(y <= 0)) {
+      stop("La tendencia exponencial requiere que todos los valores de y sean positivos.")
+    }
+    
+    t <- 1:T
+    
+    log_y <- log(y)
+    
+    X <- cbind(
+      1,
+      t
+    )
+    
+    # Estimar los coeficientes
+    beta_log <- solve(
+      crossprod(X),
+      crossprod(X, log_y)
+    )
+    
+    # Valores ajustados en escala logarítmica
+    log_yhat <- as.numeric(X %*% beta_log)
+    
+    yhat <- exp(log_yhat)
+    
+    residuos <- log_y - log_yhat
+    
+    resumen <- resumen_regresion(
+      X,
+      log_y,
+      residuos,
+      nombres = c("a", "theta")
+    )
+    
+    pronosticar <- function(h) {
+      
+      stopifnot(
+        length(h) == 1,
+        h >= 1,
+        h == as.integer(h)
+      )
+      
+      t_futuro <- T + (1:h)
+      
+      # Pronóstico en escala logarítmica
+      log_pronosticos <- beta_log[1] +
+        beta_log[2] * t_futuro
+      
+      pronosticos <- exp(log_pronosticos)
+      
+      # Corrección por sesgo
+      if (corregir_sesgo) {
+        pronosticos <- pronosticos *
+          exp(resumen$sigma2 / 2)
+      }
+      
+      return(as.numeric(pronosticos))
+    }
+    
+    # Parámetros
+    beta_0 <- exp(beta_log[1])
+    beta_1 <- exp(beta_log[2])
+    
+    return(
+      list(
+        yhat = yhat,
+        pronosticar = pronosticar,
+        parametros = list(
+          tipo = "exponencial",
+          coeficientes = resumen$tabla,
+          beta_0 = beta_0,
+          beta_1 = beta_1,
+          R2 = resumen$R2,
+          sigma2 = resumen$sigma2,
+          DW = resumen$DW,
+          rezagos_HAC = resumen$rezagos_HAC
+        )
+      )
+    )
+  }
 }
-
 
 
 
