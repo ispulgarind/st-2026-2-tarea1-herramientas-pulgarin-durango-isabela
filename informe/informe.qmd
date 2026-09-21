@@ -1,26 +1,1814 @@
 ---
-title: "informe"
-format: html
-editor: visual
+title: "Tarea 1 — Series de tiempo"
+subtitle: "Series de tiempo"
+author:
+  - "Isabela Pulgarin Durango"
+institute: "Departamento de Estadística - UNALMED"
+date: today
+lang: es
+df-print: paged
+toc: true
+toc-title: "Contenido"
+number-sections: true
+link-citations: true
+format:
+  html:
+    code-fold: show
+    code-tools: true
+    code-summary: "Mostrar/ocultar código"
+    embed-resources: true
+    theme: flatly
+    smooth-scroll: true
+editor_options:
+  chunk_output_type: inline
 ---
 
-## Quarto
-
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
-
 ```{r}
-1 + 1
+#| message: false
+#| warning: false
+
+library(knitr)
+library(tidyverse)
+library(knitr)
+library(kableExtra)
 ```
 
-You can add options to executable code like this
 
 ```{r}
-#| echo: false
-2 * 2
+source("../R/00-lectura.R")
+source("../R/01-graficos.R")
+source("../R/02-metodos.R")
+source("../R/03-evaluacion.R")
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+
+## Series
+
+::: {.panel-tabset}
+
+### AirPassengers
+
+```{r}
+datos_air <- leer_serie(
+  AirPassengers,
+  fuente = "R",
+  unidad = "pasajeros"
+)
+
+grafico_serie <- graficar_serie(
+  datos_air,
+  "Pasajeros aéreos"
+)
+
+resultado_cor <- correlograma(
+  datos_air$y
+)
+
+panel <- panel_diagnostico(
+  grafico_serie,
+  resultado_cor
+)
+
+print(panel)
+```
+La serie  de Pasajeros Aéreos muestra una clara tendencia creciente a lo largo de los años, ya que la cantidad de pasajeros aumenta con el tiempo. También presenta estacionalidad, observándose un patrón de picos y valles que se repite cada año. Por estas razones, la serie no es estacionaria, ya que tiene cambio a lo largo del tiempo, lo cual se confirma en la gráfica de autocorrelación (ACF) por el descenso lento de las barras.
+
+
+### Nile
+
+```{r}
+datos_nile <- leer_serie(
+  Nile,
+  fuente = "R",
+  unidad = "caudal"
+)
+
+grafico_serie <- graficar_serie(
+  datos_nile,
+  "Caudal del río Nilo"
+)
+
+resultado_cor <- correlograma(
+  datos_nile$y
+)
+
+panel <- panel_diagnostico(
+  grafico_serie,
+  resultado_cor
+)
+
+print(panel)
+```
+Esta serie muestra una tendencia decreciente en los primeros años y luego se estabiliza con variaciones alrededor de un nivel más bajo, por lo que no presenta una tendencia continua y definida. Tampoco se observa estacionalidad, ya que las fluctuaciones son irregulares y no siguen un patrón que se repita con el tiempo. Por lo tanto, la serie no es estacionaria, debido al cambio en la media entre el primer periodo y el resto del tiempo, lo cual también se aprecia en la gráfica de autocorrelación (ACF).
+
+### Airmiles 
+
+```{r}
+datos_airmiles <- leer_serie(
+  airmiles,
+  fuente = "R",
+  unidad = "millas"
+)
+
+grafico_airmiles <- graficar_serie(
+  datos_airmiles,
+  "Millas de pasajeros"
+)
+
+cor_airmiles <- correlograma(
+  datos_airmiles$y
+)
+
+panel_airmiles <- panel_diagnostico(
+  grafico_airmiles,
+  cor_airmiles
+)
+
+print(panel_airmiles)
+```
+Esta serie presenta una tendencia creciente muy marcada a lo largo de los años, con un aumento sostenido en las millas de pasajeros. No muestra estacionalidad, no tiene patrones de picos o caídas repetitivas dentro de periodos regulares. Por esta razón, la serie no es estacionaria, pues su nivel cambia constantemente con el tiempo.
+
+
+
+### CO2
+
+```{r}
+datos_co2 <- leer_serie(
+  co2,
+  fuente = "R",
+  unidad = "ppm"
+)
+
+grafico_co2 <- graficar_serie(
+  datos_co2,
+  "Concentración de CO2"
+)
+
+cor_co2 <- correlograma(
+  datos_co2$y
+)
+
+panel_co2 <- panel_diagnostico(
+  grafico_co2,
+  cor_co2
+)
+
+print(panel_co2)
+```
+La serie de Concentración de CO2 muestra una tendencia creciente. También presenta estacionalidad, evidente en las oscilaciones regulares que se repiten año tras año dentro de la trayectoria. Debido a la presencia de esta fuerte tendencia, la serie no es estacionaria.
+
+### USAccDeath
+
+```{r}
+datos_USA <- leer_serie(
+  USAccDeaths,
+  fuente = "R",
+  unidad = "muertes"
+)
+
+grafico_USA <- graficar_serie(
+  datos_USA,
+  "Muertes por accidentes"
+)
+
+cor_USA <- correlograma(
+  datos_USA$y
+)
+
+panel_USA <- panel_diagnostico(
+  grafico_USA,
+  cor_USA
+)
+
+print(panel_USA)
+```
+La serie de Muertes Accidentales no presenta tendencia. Muestra estacionalidad, evidente en el patrón de la ACF. La serie no es estacionaria, lo cual se confirma en la gráfica ACF al observar picos significativos de autocorrelación en el rezago 12 y en sus múltiplos.
+
+
+### Lynx
+
+```{r}
+datos_lynx <- leer_serie(
+  lynx,
+  fuente = "R",
+  unidad = "pieles"
+)
+
+grafico_lynx <- graficar_serie(
+  datos_lynx,
+  "Capturas de linces"
+)
+
+cor_lynx <- correlograma(
+  datos_lynx$y
+)
+
+panel_lynx <- panel_diagnostico(
+  grafico_lynx,
+  cor_lynx
+)
+
+print(panel_lynx)
+
+```
+La serie Capturas de Linces no tiene tendencia, presenta estacionalidad y no es estacionaria debido al cambio de nivel que se observa.
+
+### LakeHuron
+
+```{r}
+datos_Lake <- leer_serie(
+  LakeHuron,
+  fuente = "R",
+  unidad = "pies"
+)
+
+grafico_Lake <- graficar_serie(
+  datos_Lake,
+  "Nivel del lago Huron"
+)
+
+cor_Lake <- correlograma(
+  datos_Lake$y
+)
+
+panel_Lake <- panel_diagnostico(
+  grafico_Lake,
+  cor_Lake
+)
+
+print(panel_Lake)
+
+```
+La serie del Nivel del Lago de Hurón presenta tendencia, no muestra estacionalidad, ya que los cambios no siguen un patrón y no es estacionaria, puesto que la media cambia localmente por periodos.
+
+### UKgas
+
+```{r}
+datos_UK <- leer_serie(
+  UKgas,
+  fuente = "R",
+  unidad = "millones de therms"
+)
+
+grafico_UK <- graficar_serie(
+  datos_UK,
+  "Consumo de gas"
+)
+
+cor_UK <- correlograma(
+  datos_UK$y
+)
+
+panel_UK <- panel_diagnostico(
+  grafico_UK,
+  cor_UK
+)
+
+print(panel_UK)
+```
+El gráfico de la serie de consumo de gas en el Reino Unido muestra una clara tendencia creciente a lo largo de los años. Presenta estacionalidad, con picos periódicos muy marcados que se repiten cada cuatro trimestres (rezago 4 en el ACF). Por la presencia de tendencia y estacionalidad, la serie no es estacionaria. 
+
+### Sunspot.year
+
+```{r}
+datos_sun <- leer_serie(
+  sunspot.year,
+  fuente = "R",
+  unidad = "número de manchas solares"
+)
+
+grafico_sun <- graficar_serie(
+  datos_sun,
+  "Manchas solares"
+)
+
+cor_sun <- correlograma(
+  datos_sun$y
+)
+
+panel_sun <- panel_diagnostico(
+  grafico_sun,
+  cor_sun
+)
+
+print(panel_sun)
+```
+
+La serie de manchas solares no presenta una tendencia clara, ya que los valores aumentan y disminuyen a lo largo del tiempo. Sin embargo, no es estacionaria, porque presenta cambios importantes en su nivel. Además, se observa un comportamiento estacional, con períodos de valores altos y bajos que se repiten.
+
+### WWWusage
+
+```{r}
+datos_W <- leer_serie(
+  WWWusage,
+  fuente = "R",
+  unidad = "usuarios"
+)
+
+grafico_W <- graficar_serie(
+  datos_W,
+  "Uso de Internet"
+)
+
+cor_W <- correlograma(
+  datos_W$y
+)
+
+panel_W <- panel_diagnostico(
+  grafico_W,
+  cor_W
+)
+
+print(panel_W)
+```
+La serie de uso de Internet presenta una tendencia creciente, aunque se observan algunas disminuciones durante el período. Por esta razón, no es estacionaria, ya que su nivel cambia con el tiempo. No se observa una estacionalidad clara, aunque existe una fuerte relación entre observaciones cercanas, como se aprecia en la ACF.
+
+### Austres
+
+```{r}
+datos_austres <- leer_serie(
+  austres,
+  fuente = "R",
+  unidad = "miles de personas"
+)
+
+grafico_austres <- graficar_serie(
+  datos_austres,
+  "Población australiana"
+)
+
+cor_austres <- correlograma(
+  datos_austres$y
+)
+
+panel_austres <- panel_diagnostico(
+  grafico_austres,
+  cor_austres
+)
+
+print(panel_austres)
+```
+La serie de Población de Australia presenta una tendencia creciente muy marcada. En el gráfico de la serie se observa una línea casi perfecta que crece a lo largo del tiempo, lo que indica que la serie no es estacionaria en media. Además, el correlograma confirma esta tendencia, ya que hay un decaimiento muy lento. Asimismo, la ausencia de picos o patrones periódicos en el correlograma permite descartar la presencia de estacionalidad.
+
+### JohnsonJohnson
+
+```{r}
+datos_J <- leer_serie(
+  JohnsonJohnson,
+  fuente = "R",
+  unidad = "millones de dólares"
+)
+
+grafico_J <- graficar_serie(
+  datos_J,
+  "Ganancias de Johnson & Johnson"
+)
+
+cor_J <- correlograma(
+  datos_J$y
+)
+
+panel_J <- panel_diagnostico(
+  grafico_J,
+  cor_J
+)
+
+print(panel_J)
+```
+Esta serie muestra una fuerte tendencia creciente a lo largo del tiempo. Presenta estacionalidad, observable en las fluctuaciones periódicas regulares. Debido a la tendencia marcada y la presencia de estacionalidad, la serie no es estacionaria.
+
+### UKDriverDeaths 
+
+```{r}
+datos_UKD <- leer_serie(
+  UKDriverDeaths,
+  fuente = "R",
+  unidad = "muertes"
+)
+
+grafico_UKD <- graficar_serie(
+  datos_UKD,
+  "Muertes de conductores"
+)
+
+cor_UKD <- correlograma(
+  datos_UKD$y
+)
+
+panel_UKD <- panel_diagnostico(
+  grafico_UKD,
+  cor_UKD
+)
+
+print(panel_UKD)
+```
+La serie de Muertes de conductores no muestra una tendencia clara. Presenta estacionalidad muy clara, con picos repetitivos cada 12 meses (evidente en el rezago 12 del ACF). Por esta estacionalidad marcada y el cambio en el nivel medio, la serie no es estacionaria
+
+### Nottem
+
+```{r}
+datos_nottem <- leer_serie(
+  nottem,
+  fuente = "R",
+  unidad = "grados Fahrenheit"
+)
+
+grafico_nottem <- graficar_serie(
+  datos_nottem,
+  "Temperatura en Nottingham"
+)
+
+cor_nottem <- correlograma(
+  datos_nottem$y
+)
+
+panel_nottem <- panel_diagnostico(
+  grafico_nottem,
+  cor_nottem
+)
+
+print(panel_nottem)
+```
+
+La serie de Temperatura en Nottingham presenta un patrón estacional claro. En el gráfico de la serie se observa que el nivel oscila alrededor de un valor constante a lo largo del tiempo, lo que sugiere que la serie es estacionaria en media. Además el correlograma confirma la estacionalidad, ya que hay picos prominentes y repetidos en los rezagos.
+
+### Discoveries
+
+```{r}
+datos_disc <- leer_serie(
+  discoveries,
+  fuente = "R",
+  unidad = "descubrimientos"
+)
+
+grafico_disc <- graficar_serie(
+  datos_disc,
+  "Descubrimientos científicos"
+)
+
+cor_disc <- correlograma(
+  datos_disc$y
+)
+
+panel_disc <- panel_diagnostico(
+  grafico_disc,
+  cor_disc
+)
+
+print(panel_disc)
+```
+La serie Descubrimientos Científicos no muestra estacionalidad, ya que las fluctuaciones no siguen un patrón periódico regular ni fijo. La serie no es estacionaria debido a los cambios de nivel medio a lo largo del tiempo, lo cual se refleja en los primeros rezagos significativos del ACF.
+
+### Seatbelts
+
+```{r}
+datos_St <- leer_serie(
+  Seatbelts[, "DriversKilled"],
+  fuente = "R",
+  unidad = "conductores fallecidos"
+)
+
+grafico_St <- graficar_serie(
+  datos_St,
+  "Conductores fallecidos"
+)
+
+cor_St <- correlograma(
+  datos_St$y
+)
+
+panel_St <- panel_diagnostico(
+  grafico_St,
+  cor_St
+)
+
+print(panel_St)
+```
+La serie no muestra tendencia, presenta estacionalidad, evidente en los picos que se repiten año tras año y en los picos significativos del ACF cada 12 rezagos. Debido a esta presencia de cambio de nivel, la serie no es estacionaria.
+
+:::
+
+## Series Seleccionadas
+
+
+```{r}
+# Tabla de decisión
+
+tabla_decision <- data.frame(
+  Serie     = c("Descubrimientos Científicos",
+                "Temperatura en Nottingham",
+                "Muerte Conductores",
+                "Muertes accidentales",
+                "Población Australia", 
+                "Millas de Psajeros",
+                "Johnson & Johnson",
+              "Nivel Lago Hurón"),
+  Patrón    = c("Sin tendencia, Sin estacionalidad, No estacionaria", "Estacional, estacionaria, Sin tendencia", "Sin tendencia, Estacionalidad, No estacionaria", "Sin tendencia, Estacionalidad, No estacionaria", "Tendencia, No estacionalidad, No estacionaria", "Tendencia, No estacionalidad, No estacionaria", "Tendencia, Estacionalidad, No estacionaria", "Tendencia, No estacionalidad, No estacionaria"),
+  Familia   = c("Media Simple", "Media Móvil", "Doble Media Móvil", "SES", "Tendencia Lineal", "Tendencia Cuadrática", "Tendencia Exponencial", "Holt"),
+  stringsAsFactors = FALSE
+)
+```
+
+
+```{r}
+#Visualización
+kable(tabla_decision,
+      format    = "html",
+      col.names = c("Serie", "Patrón", "Familia"),            # 3 columnas
+      align     = c("l", "l", "l"),
+      caption   = "Tabla de decisión — Diagnóstico de series de tiempo") |>
+  kable_styling(bootstrap_options = "basic",
+                full_width         = FALSE,
+                position          = "center") |>
+  row_spec(0, bold = TRUE) |>                                 # Encabezado en negrita
+  row_spec(1:nrow(tabla_decision), extra_css = "border-bottom: none;") |> # Aplica a las 8 filas
+  column_spec(1:3, border_left = FALSE, border_right = FALSE) |> # Sin líneas verticales (3 cols)
+  add_header_above(c(" " = 3), line = TRUE, bold = TRUE) |>   # Línea superior APA (3 cols)
+  row_spec(nrow(tabla_decision), extra_css = "border-bottom: 1px solid black;") # Línea inferior APA
+```
+
+:::
+
+##Ejemplos
+
+### Descubrimientos Científicos
+
+::: {.panel-tabset}
+
+#### Descripción de la serie
+
+```{r}
+#Crear dataframe con los resultados
+propiedades_descubrimientos <- data.frame(
+  Métrica    = c("Longitud de la serie (n)", 
+                 "Año de inicio", 
+                 "Año de fin", 
+                 "Frecuencia observada"),
+  Valor      = c(length(datos_disc$y),
+                 start(discoveries)[1],
+                 end(discoveries)[1],
+                 frequency(discoveries)),
+  Descripción = c("Número total de observaciones anuales",
+                  "Primer año registrado en la serie",
+                  "Último año registrado en la serie",
+                  "Frecuencia anual de medición (1 dato/año)"),
+  stringsAsFactors = FALSE
+)
+```
+
+```{r}
+#Visualización de la tabla
+kable(propiedades_descubrimientos,
+      format    = "html",
+      col.names = c("Métrica", "Valor", "Descripción"),
+      align     = c("l", "c", "l"),
+      caption   = "Propiedades temporales — Serie de Descubrimientos Científicos") |>
+  kable_styling(bootstrap_options = "basic",
+                full_width         = FALSE,
+                position          = "center") |>
+  row_spec(0, bold = TRUE) |>                                               # Encabezado en negrita
+  row_spec(1:nrow(propiedades_descubrimientos), extra_css = "border-bottom: none;") |> # Sin líneas intermedias
+  column_spec(1:3, border_left = FALSE, border_right = FALSE) |>             # Sin líneas verticales
+  add_header_above(c(" " = 3), line = TRUE, bold = TRUE) |>                 # Línea superior APA
+  row_spec(nrow(propiedades_descubrimientos), extra_css = "border-bottom: 1px solid black;") # Línea inferior APA
+```
+La serie de Descubrimientos científicos contiene $100$ observaciones de frecuencia anual, abarcando desde $1860$ hasta $1959$.
+
+#### Exploración de la serie
+
+::: {.panel-tabset}
+
+##### Gráficos
+
+```{r}
+datos_disc <- leer_serie(
+  discoveries,
+  fuente = "R",
+  unidad = "descubrimientos"
+)
+
+grafico_disc <- graficar_serie(
+  datos_disc,
+  "Descubrimientos científicos"
+)
+
+cor_disc <- correlograma(
+  datos_disc$y
+)
+
+panel_disc <- panel_diagnostico(
+  grafico_disc,
+  cor_disc
+)
+
+print(panel_disc)
+```
+La serie de Descubrimientos científicos no presenta una tendencia definida a largo plazo ni un comportamiento estacional, oscilando alrededor de un nivel promedio constante. Por estas características, es una serie adecuada para aplicar el método de media simple.
+
+##### Contraste individual de los $r_h$
+
+Prueba de Hipótesis
+
+$$ H_0:\rho_h=0 $$ 
+$$ H_1:\rho_h\neq0 $$
+
+Estadístico de Prueba:
+
+$$ Z_h=\frac{r_h}{1/\sqrt{T}} $$
+
+Distribución bajo \(H_0\):
+
+$$ Z_h\sim N(0,1) $$
+
+ Región de rechazo al 5 %:
+
+$$ |Z_h|>1.96 $$
+
+```{r}
+#Contraste Individual
+r <- cor_disc$acf
+
+T <- length(datos_disc$y)
+
+z <- r * sqrt(T)
+
+valor_p <- 2 * pnorm(-abs(z))
+
+valor_critico <- qnorm(0.975)
+
+tabla_acf <- data.frame(
+  rezago = 1:length(r),
+  r_h = r,
+  estadistico = z,
+  valor_p = valor_p,
+  significativo = abs(z) > valor_critico
+)
+
+```
+
+
+```{r}
+# Ajustar el data frame para mejorar la presentación numérica
+tabla_acf_formato <- tabla_acf
+tabla_acf_formato$r_h         <- round(tabla_acf_formato$r_h, 4)
+tabla_acf_formato$estadistico <- round(tabla_acf_formato$estadistico, 4)
+tabla_acf_formato$valor_p     <- format.pval(tabla_acf_formato$valor_p, digits = 4, eps = 0.0001)
+tabla_acf_formato$significativo <- ifelse(tabla_acf_formato$significativo, "Sí", "No")
+```
+
+
+```{r}
+#Visualización estilo APA
+kable(tabla_acf_formato,
+      format    = "html",
+      col.names = c("Rezago ($h$)", "Autocorrelación ($r_h$)", "Estadístico ($z$)", "Valor $p$", "Significativo"),
+      align     = c("c", "c", "c", "c", "c"),
+      caption   = "Contraste individual de autocorrelación — Serie de Descubrimientos") |>
+  kable_styling(bootstrap_options = "basic",
+                full_width         = FALSE,
+                position          = "center") |>
+  row_spec(0, bold = TRUE) |>                                             # Encabezado en negrita
+  row_spec(1:nrow(tabla_acf_formato), extra_css = "border-bottom: none;") |> # Sin líneas intermedias
+  column_spec(1:5, border_left = FALSE, border_right = FALSE) |>           # Sin líneas verticales
+  add_header_above(c(" " = 5), line = TRUE, bold = TRUE) |>               # Línea superior APA
+  row_spec(nrow(tabla_acf_formato), extra_css = "border-bottom: 1px solid black;")
+```
+
+Los resultados muestran que los rezagos 1, 2 y 3 presentan autocorrelaciones significativamente diferentes de cero al 5 %, con valores p de 0.0061, 0.0117 y 0.0209, respectivamente. Para los rezagos 4 a 24 no se rechaza la hipótesis nula, ya que todos sus valores p son mayores que 0.05. Por tanto, la dependencia lineal individual de la serie se concentra principalmente en los primeros tres rezagos.
+
+
+##### Ljung Box
+
+Prueba Hipótesis
+
+$$ H_0:\rho_1=\rho_2=\cdots=\rho_{24}=0 $$ 
+$$ H_1:\text{al menos una }\rho_h\neq0 $$
+
+Estadístico de Prueba
+
+$$Q = T(T + 2) \sum_{h=1}^{24} \frac{{r}_h^2}{T - h} $$
+Distribución
+
+$$Q \sim \chi^2_{24}$$
+Región de Rechazo
+
+$$Q > \chi^2_{0.95, 24}$$
+
+```{r}
+#Ljung Box
+resultado_lb_disc <- ljung_box(
+  r = cor_disc$acf,
+  T = length(datos_disc$y),
+  m = 24,
+  p = 0
+)
+
+```
+
+```{r}
+cat(
+  "Descubrimientos → Q =", round(resultado_lb_disc$estadistico, 4),
+  "| gl =", resultado_lb_disc$grados_libertad,
+  "| valor crítico =", round(resultado_lb_disc$valor_critico, 4),
+  "| p-valor =", round(resultado_lb_disc$valor_p, 4), "\n"
+)
+```
+
+El estadístico observado fue $Q=36.254$, mientras que el valor crítico al 5% fue $36.415$. Como $Q<36.415$ y el valor p es $0.0518>0.05$, no se rechaza la hipótesis nula. Por tanto, no se encuentra evidencia estadística suficiente de autocorrelación conjunta en los primeros 24 rezagos de la serie. Este resultado es consistente con una serie que no presenta dependencia lineal conjunta significativa al nivel del 5%.
+
+:::
+
+#### Estimación y Validación
+
+::: {.panel-tabset}
+
+##### Partición de la serie
+
+```{r}
+#Partición de la serie
+h <- min(
+  12,
+  floor(0.2 * T)
+)
+
+y_estimacion <- datos_disc$y[1:(T - h)]
+
+y_validacion <- datos_disc$y[(T - h + 1):T]
+```
+
+```{r}
+cat(
+  "Descubrimientos → Estimación =", length(y_estimacion),
+  "| Validación =", length(y_validacion), "\n"
+)
+```
+La serie contiene $T=100$ observaciones. De acuerdo con el protocolo, se toma $h=\min(12,\lfloor0.2T\rfloor)=12$ observaciones para validación. Por tanto, las primeras 88 observaciones se utilizan para la estimación y las últimas 12 se reservan para validar los pronósticos del método de media simple.
+
+
+##### Media simple
+
+```{r}
+#Ajustar Media Simple
+modelo_disc <- ajustar_media(
+  y_estimacion
+)
+```
+
+
+```{r}
+#Pronósticos
+pronosticos_disc <- modelo_disc$pronosticar(h)
+```
+
+```{r}
+cat(
+  "Horizonte de validación (h):", h, "\n",
+  "Pronóstico constante:", round(pronosticos_disc[1], 4), "\n"
+)
+```
+
+El método de media simple produce un pronóstico constante de \(3.3068\) para las 12 observaciones del tramo de validación. Esto ocurre porque el método utiliza el promedio de las 88 observaciones del tramo de estimación como pronóstico para todos los horizontes. Por tanto, el pronóstico no cambia a medida que aumenta el horizonte.
+
+
+##### Medidas de error
+
+```{r}
+#Medidas de error
+posiciones <- which(
+  !is.na(modelo_disc$yhat)
+)
+
+medidas_estimacion <- medidas(
+  y_estimacion[posiciones],
+  modelo_disc$yhat[posiciones]
+)
+
+medidas_validacion <- medidas(
+  y_validacion,
+  pronosticos_disc
+)
+```
+
+```{r}
+tabla_medidas_disc <- data.frame(
+  Tramo = c("Estimación", "Validación"),
+  MSE = c(
+    round(medidas_estimacion$MSE, 4),
+    round(medidas_validacion$MSE, 4)
+  ),
+  MAD = c(
+    round(medidas_estimacion$MAD, 4),
+    round(medidas_validacion$MAD, 4)
+  ),
+  MAPE = c(
+    medidas_estimacion$MAPE,
+    medidas_validacion$MAPE
+  ),
+  MASE = c(
+    round(medidas_estimacion$MASE, 4),
+    round(medidas_validacion$MASE, 4)
+  )
+)
+
+tabla_medidas_disc
+```
+
+En el tramo de estimación, el método de media simple presenta un MSE de 5.4246 y un MAD de 1.7663. En el tramo de validación, estos valores son 4.8801 y 1.9545, respectivamente. Esto indica que el error absoluto promedio fue ligeramente mayor en la validación.
+
+El MAPE no puede calcularse debido a la presencia de observaciones iguales a cero en la serie, por lo que se reporta como NA.
+
+El MASE obtenido para la estimación es 0.8301. La interpretación del MASE de validación se realizará posteriormente al construir el referente ingenuo, utilizando la escala establecida en el protocolo.
+
+
+```{r}
+#Referente ingenuo
+pronosticos_ingenuo <- rep(
+  y_estimacion[length(y_estimacion)],
+  h
+)
+
+medidas_ingenuo <- medidas(
+  y_validacion,
+  pronosticos_ingenuo
+)
+```
+
+```{r}
+cat(
+  "Horizonte de validación (h):", h, "\n",
+  "Pronóstico ingenuo:", pronosticos_ingenuo[1], "\n"
+)
+```
+```{r}
+tabla_ingenuo <- data.frame(
+  Metodo = "Ingenuo",
+  MSE = round(medidas_ingenuo$MSE, 4),
+  MAD = round(medidas_ingenuo$MAD, 4),
+  MAPE = medidas_ingenuo$MAPE,
+  MASE = round(medidas_ingenuo$MASE, 4)
+)
+
+tabla_ingenuo
+```
+
+Al comparar los resultados de validación, la media simple presenta un MSE de 4.8801 y un MAD de 1.9545, mientras que el método ingenuo presenta un MSE de 7.7500 y un MAD de 2.4167. Por lo tanto, para este tramo de validación, la media simple presenta menores errores según ambas medidas. 
+
+```{r}
+error_ingenuo_estimacion <- abs(
+  y_estimacion[2:length(y_estimacion)] -
+    y_estimacion[1:(length(y_estimacion) - 1)]
+)
+
+escala_mase <- mean(error_ingenuo_estimacion)
+```
+
+```{r}
+cat(
+  "Escala MASE (ingenuo en estimación):",
+  round(escala_mase, 4),
+  "\n"
+)
+```
+La escala utilizada para calcular el MASE es 2.1264, correspondiente al error absoluto medio del método ingenuo dentro del tramo de estimación. Este valor se utiliza como referencia para escalar los errores absolutos de los métodos y permitir su comparación mediante el MASE.
+
+```{r}
+# MASE corregido usando la escala del ingenuo en estimación
+
+MASE_media_simple <- medidas_validacion$MAD / escala_mase
+
+MASE_ingenuo <- medidas_ingenuo$MAD / escala_mase
+
+cat(
+  "MASE media simple:", round(MASE_media_simple, 4), "\n",
+  "MASE ingenuo:", round(MASE_ingenuo, 4), "\n"
+)
+```
+
+```{r}
+tabla_comparacion <- data.frame(
+  Metodo = c("Media simple", "Ingenuo"),
+  MSE = c(
+    round(medidas_validacion$MSE, 4),
+    round(medidas_ingenuo$MSE, 4)
+  ),
+  MAD = c(
+    round(medidas_validacion$MAD, 4),
+    round(medidas_ingenuo$MAD, 4)
+  ),
+  MAPE = c(
+    medidas_validacion$MAPE,
+    medidas_ingenuo$MAPE
+  ),
+  MASE = c(
+    round(MASE_media_simple, 4),
+    round(MASE_ingenuo, 4)
+  )
+)
+
+tabla_comparacion
+```
+
+En el tramo de validación, la media simple presenta un MSE de 4.8801 y un MAD de 1.9545, menores que los obtenidos por el método ingenuo, que fueron 7.7500 y 2.4167, respectivamente.Al utilizar como escala del MASE el error absoluto medio del ingenuo en el tramo de estimación, la media simple obtiene un MASE de 0.9192, mientras que el ingenuo obtiene 1.1365. En conjunto, estas medidas muestran que, para las 12 observaciones del tramo de validación, la media simple presentó menores errores que el referente ingenuo.
+
+
+:::
+
+#### Validación de los errores
+
+
+```{r}
+# Errores de pronóstico dentro de la estimación
+
+posiciones <- which(!is.na(modelo_disc$yhat))
+
+errores_disc <- y_estimacion[posiciones] - modelo_disc$yhat[posiciones]
+
+```
+
+
+```{r}
+#Validación de los errores
+resultado_errores_disc <- validar_errores(
+  e = errores_disc,
+  m = NULL,
+  p = 0
+)
+```
+
+::: {.panel-tabset}
+
+##### Gráfico
+
+```{r}
+resultado_errores_disc$grafico_errores
+```
+El gráfico de los errores de pronóstico muestra una serie que oscila alrededor de la línea horizontal de cero, con errores tanto positivos como negativos. No se observa una tendencia o un patrón cíclico claramente definido. Se destaca un pico positivo inusualmente alto alrededor del período 25, que corresponde a un error considerablemente mayor que los demás. Exceptuando este valor extremo, la dispersión de los errores parece mantenerse relativamente estable a lo largo del período observado. En general, el gráfico no muestra un patrón sistemático evidente en los errores.
+
+
+##### Correlograma
+
+```{r}
+resultado_errores_disc$correlograma$grafico
+```
+Los gráficos de autocorrelación (ACF) y autocorrelación parcial (PACF) muestran que la mayoría de los rezagos se encuentran dentro de las bandas de significancia, por lo que no se observa una dependencia persistente a lo largo de los rezagos. En el ACF, los dos primeros rezagos sobresalen ligeramente por encima de la banda superior, lo que indica autocorrelación positiva individual en los primeros períodos. En el PACF, el primer rezago también presenta un valor por encima de la banda, mientras que los siguientes se encuentran principalmente dentro de ella. Por tanto, existe cierta dependencia en los primeros rezagos, pero no se observa un patrón de autocorrelación persistente o de largo plazo.
+
+
+##### Prueba t
+
+Prueba de Hipótesis
+
+$$H_0: \mu_e = 0$$
+$$H_1: \mu_e \neq 0$$
+
+Estadístico de Prueba:
+
+$$t = \frac{\bar{e}}{s_e / \sqrt{n}}$$
+
+
+Distribución bajo $H_0$
+$$t \sim t_{n-1} = t_{86}$$
+Región de Rechazo
+
+$$|t| > t_{0.975,\,86}$$
+
+```{r}
+cat(
+  "Estadístico de prueba:", round(resultado_errores_disc$t, 4), "\n",
+  "Grados de libertad:", resultado_errores_disc$grados_libertad_t, "\n",
+  "Valor crítico:", round(
+    qt(0.975, resultado_errores_disc$grados_libertad_t), 4
+  ), "\n",
+  "Valor p:", round(resultado_errores_disc$valor_p_t, 4), "\n"
+)
+```
+El estadístico de prueba obtenido fue $t=0.1943$, con 86 grados de libertad, mientras que el valor crítico al 5 % fue $1.9879$. Como $|t|=0.1943<1.9879$ y el valor $p=0.8464>0.05$, no se rechaza la hipótesis nula de que la media de los errores sea igual a cero. Por tanto, no existe evidencia estadística de un sesgo sistemático en los errores de pronóstico.
+
+
+##### Ljung Box
+
+Prueba de Hipótesis
+
+$$ H_0:\rho_1=\rho_2=\cdots=\rho_{21}=0 $$ 
+$$ H_1:\text{al menos una }\rho_h\neq0 $$
+
+Estadístico de Prueba
+
+$$Q = T(T + 2) \sum_{h=1}^{21} \frac{{r}_h^2}{T - h} $$
+
+Distribución
+
+$$Q \sim \chi^2_{21}$$
+
+
+Región de Rechazo
+
+$$Q > \chi^2_{0.95, 21}$$
+
+```{r}
+cat(
+  "Estadístico de prueba:", round(
+    resultado_errores_disc$ljung_box$estadistico, 4
+  ), "\n",
+  "Grados de libertad:", resultado_errores_disc$ljung_box$grados_libertad, "\n",
+  "Valor crítico:", round(
+    resultado_errores_disc$ljung_box$valor_critico, 4
+  ), "\n",
+  "Valor p:", round(
+    resultado_errores_disc$ljung_box$valor_p, 4
+  ), "\n"
+)
+```
+El estadístico de prueba obtenido fue $Q=27.6425$, con 21 grados de libertad, mientras que el valor crítico al 5 % fue $32.6706$. Como $Q=27.6425<32.6706$ y el valor p $=0.1506>0.05$, no se rechaza la hipótesis nula. Por tanto, no existe evidencia estadística de autocorrelación conjunta significativa en los errores hasta el rezago 21. En consecuencia, respecto a la autocorrelación, los errores presentan un comportamiento compatible con ruido blanco.
+
+
+##### Jarque Bera
+
+Prueba de Hipótesis
+
+$$ H_0:\text{los errores tienen distribución normal} $$ 
+$$ H_1:\text{los errores no tienen distribución normal} $$
+
+Distribución Bajo $H_0$:
+
+$$ JB \sim \chi^2_{2} $$
+
+Estadístico de Prueba
+
+$$JB = \frac{n}{6} \left( A^2 + \frac{(K - 3)^2}{4} \right)$$
+
+Región de rechazo
+$$ JB>\chi^2_{0.95,2} $$
+
+```{r}
+cat(
+  "Estadístico de prueba:", round(
+    resultado_errores_disc$jarque_bera$estadistico, 4
+  ), "\n",
+  "Grados de libertad:", resultado_errores_disc$jarque_bera$grados_libertad, "\n",
+  "Valor crítico:", round(
+    resultado_errores_disc$jarque_bera$valor_critico, 4
+  ), "\n",
+  "Valor p:", format.pval(
+    resultado_errores_disc$jarque_bera$valor_p,
+    digits = 4
+  ), "\n"
+)
+```
+El estadístico de prueba obtenido fue $JB=41.2674$, con 2 grados de libertad, mientras que el valor crítico al 5 % fue $5.9915$. Como $JB=41.2674>5.9915$ y el valor p $=1.094\times10^{-9}<0.05$, se rechaza la hipótesis nula de normalidad. Por tanto, existe evidencia estadística de que los errores de pronóstico no siguen una distribución normal.
+
+
+##### Durbin Watson
+
+Prueba de Hipótesis:
+
+$$ H_0:\rho=0 $$ $$ H_1:\rho\neq0 $$
+
+
+Estadístico de Prueba:
+
+$$ DW=\frac{\sum_{t=2}^{n}(e_t-e_{t-1})^2} {\sum_{t=1}^{n}e_t^2} $$
+
+```{r}
+cat(
+  "Estadístico de prueba:", round(
+    resultado_errores_disc$durbin_watson$estadistico, 4
+  ), "\n",
+  "Grados de libertad: no aplica\n",
+  "Valor crítico: no calculado\n",
+  "Valor p: no calculado\n"
+)
+```
+El estadístico de Durbin-Watson obtenido fue $DW=1.5043$. En este caso no se calculan grados de libertad, valor crítico ni valor p, por lo que no se realiza una decisión formal mediante este estadístico. De manera descriptiva, el valor se encuentra por debajo de 2, lo que sugiere cierta autocorrelación positiva de primer orden en los errores. Sin embargo, la prueba de Ljung-Box no encontró evidencia de autocorrelación conjunta significativa ($p=0.1506$). Por tanto, aunque el estadístico de Durbin-Watson sugiere cierta dependencia positiva de primer orden, no se encuentra evidencia estadística suficiente de autocorrelación conjunta significativa en los errores.
+
+:::
+
+#### Gráfico Final
+
+```{r}
+ggplot2::ggplot(
+  data.frame(
+    tiempo = 1:T,
+    real = datos_disc$y,
+    ajuste = c(modelo_disc$yhat, rep(NA, h)),
+    pronostico = c(rep(NA, T - h), pronosticos_disc)
+  ),
+  ggplot2::aes(x = tiempo)
+) +
+  
+  # Serie real
+  ggplot2::geom_line(
+    ggplot2::aes(y = real),
+    color = "purple"
+  ) +
+  
+  # Ajuste de media simple
+  ggplot2::geom_line(
+    ggplot2::aes(y = ajuste),
+    color = "green"
+  ) +
+  
+  # Pronóstico
+  ggplot2::geom_line(
+    ggplot2::aes(y = pronostico),
+    color = "green"
+  ) +
+  
+  # Separación entre estimación y validación
+  ggplot2::geom_vline(
+    xintercept = T - h,
+    color = "red",
+    linetype = "dashed"
+  ) +
+  
+  ggplot2::labs(
+    title = "Discoveries: ajuste y pronóstico de media simple",
+    x = "Tiempo",
+    y = "Número de descubrimientos"
+  ) +
+  
+  ggplot2::theme_minimal()
+```
+
+El gráfico muestra el ajuste histórico y el pronóstico de la serie de descubrimientos científicos mediante el método de media simple. La línea morada representa los datos reales observados, que presentan fluctuaciones anuales sin una tendencia clara de crecimiento o decrecimiento a largo plazo. La línea verde muestra la estimación del modelo, que al inicio se adapta a los primeros datos y posteriormente se estabiliza de manera casi horizontal alrededor de un valor cercano a 3.31 descubrimientos. A partir de la línea punteada roja, que marca el inicio del período de validación, el pronóstico se mantiene completamente constante en ese mismo nivel promedio histórico. Aunque la media simple permite representar el nivel general de la serie, presenta poca capacidad para reaccionar ante los picos y las variaciones locales de corto plazo, debido a que cada nuevo pronóstico depende del promedio de las observaciones anteriores.
+
+
+#### Conclusión
+
+La serie Descubrimientos Científicos fue modelada mediante el método de media simple, sin parámetros ajustables, utilizando las primeras 88 observaciones para estimación y las últimas 12 para validación. La elección del método resulta razonable debido a que la serie no presenta una tendencia creciente o decreciente claramente definida ni una estacionalidad evidente, por lo que resulta apropiado utilizar un método que represente su nivel promedio. En el período de validación, la media simple obtuvo un MSE de **4.8801**, un MAD de **1.9545** y un MASE de **0.9192**, frente a **7.7500**, **2.4167** y **1.1365** del método ingenuo, respectivamente. Además, la prueba t de media cero presentó un valor p de **0.8464** y la prueba de Ljung–Box un valor p de **0.1506**, por lo que no se encontró evidencia de sesgo ni de autocorrelación conjunta significativa en los errores. Sin embargo, la prueba de Jarque–Bera presentó un valor p inferior a **0.001**, indicando que los errores no siguen una distribución normal. En conjunto, la media simple mostró un desempeño favorable frente al referente, aunque presenta limitaciones para representar las variaciones de corto plazo de la serie.
+
+El pronóstico mediante media simple podría ser útil para **instituciones de investigación, organismos de ciencia y tecnología o responsables de planeación científica** que necesiten una estimación sencilla del número esperado de descubrimientos. Para esta serie, un horizonte razonable sería **corto, de hasta 12 períodos**, correspondiente al horizonte de validación utilizado. Su principal limitación es que no incorpora los cambios recientes de la serie y produce pronósticos constantes; en este caso, los 12 pronósticos de validación permanecieron en aproximadamente **3.31 descubrimientos**, mientras que el MAD fue de **1.9545**. Por esta razón, aunque la media simple resulta adecuada como referencia de corto plazo y presentó menores errores que el método ingenuo, **si el objetivo fuera reaccionar mejor ante variaciones recientes de la serie, sería conveniente evaluar métodos que incorporen información más reciente**.
+
+
+#### Comparación con otro método
+
+:::
+
+### Temperatura Nottingham
+
+::: {.panel-tabset}
+
+#### Descripción de la serie
+
+```{r}
+# Crear dataframe con los resultados
+propiedades_nottem <- data.frame(
+  Métrica = c(
+    "Longitud de la serie (n)",
+    "Fecha de inicio",
+    "Fecha de fin",
+    "Frecuencia observada"
+  ),
+  
+  Valor = c(
+    length(datos_nottem$y),
+    paste0(start(nottem)[1], "-", sprintf("%02d", start(nottem)[2])),
+    paste0(end(nottem)[1], "-", sprintf("%02d", end(nottem)[2])),
+    frequency(nottem)
+  ),
+  
+  Descripción = c(
+    "Número total de observaciones mensuales",
+    "Primer mes registrado en la serie",
+    "Último mes registrado en la serie",
+    "Frecuencia mensual de medición (12 datos/año)"
+  ),
+  
+  stringsAsFactors = FALSE
+)
+```
+
+```{r}
+# Visualización de la tabla
+kable(
+  propiedades_nottem,
+  format = "html",
+  col.names = c("Métrica", "Valor", "Descripción"),
+  align = c("l", "c", "l"),
+  caption = "Propiedades temporales — Serie de Temperatura de Nottingham"
+) |>
+  kable_styling(
+    bootstrap_options = "basic",
+    full_width = FALSE,
+    position = "center"
+  ) |>
+  row_spec(0, bold = TRUE) |>
+  row_spec(
+    1:nrow(propiedades_nottem),
+    extra_css = "border-bottom: none;"
+  ) |>
+  column_spec(
+    1:3,
+    border_left = FALSE,
+    border_right = FALSE
+  ) |>
+  add_header_above(
+    c(" " = 3),
+    line = TRUE,
+    bold = TRUE
+  ) |>
+  row_spec(
+    nrow(propiedades_nottem),
+    extra_css = "border-bottom: 1px solid black;"
+  )
+```
+
+La serie Temperatura de Nottingham contiene $240$ observaciones de frecuencia mensual, abarcando desde Enero de $1920$ hasta Diciembre de $1939$.
+
+#### Exploración de la serie
+
+::: {.panel-tabset}
+
+##### Gráficos
+
+```{r}
+datos_nottem <- leer_serie(
+  nottem,
+  fuente = "R",
+  unidad = "grados Fahrenheit"
+)
+
+grafico_nottem <- graficar_serie(
+  datos_nottem,
+  "Temperatura en Nottingham"
+)
+
+cor_nottem <- correlograma(
+  datos_nottem$y
+)
+
+panel_nottem <- panel_diagnostico(
+  grafico_nottem,
+  cor_nottem
+)
+
+print(panel_nottem)
+```
+La serie no presenta tendencia a largo plazo, tiene una fuerte estacionalidad anual, evidente en las oscilaciones periódicas y en los picos cada 12 rezagos en el ACF. Finalmente, la serie es estacionaria, al mantener su media estable en el tiempo.
+
+
+##### Contraste individual de los $r_h$
+
+Prueba de Hipótesis
+
+$$ H_0:\rho_h=0 $$ 
+$$ H_1:\rho_h\neq0 $$
+
+Estadístico de Prueba:
+
+$$ Z_h=\frac{r_h}{1/\sqrt{T}} $$
+
+Distribución bajo \(H_0\):
+
+$$ Z_h\sim N(0,1) $$
+
+Región de rechazo al 5 %:
+
+$$ |Z_h|>1.96 $$
+
+```{r}
+# Contraste individual
+
+r <- cor_nottem$acf
+
+T <- length(datos_nottem$y)
+
+z <- r * sqrt(T)
+
+valor_p <- 2 * pnorm(-abs(z))
+
+valor_critico <- qnorm(0.975)
+
+tabla_acf_nottem <- data.frame(
+  rezago = 1:length(r),
+  r_h = r,
+  estadistico = z,
+  valor_p = valor_p,
+  significativo = abs(z) > valor_critico
+)
+```
+
+```{r}
+# Ajustar el data frame para mejorar la presentación numérica
+
+tabla_acf_nottem_formato <- tabla_acf_nottem
+
+tabla_acf_nottem_formato$r_h <-
+  round(tabla_acf_nottem_formato$r_h, 4)
+
+tabla_acf_nottem_formato$estadistico <-
+  round(tabla_acf_nottem_formato$estadistico, 4)
+
+tabla_acf_nottem_formato$valor_p <-
+  format.pval(
+    tabla_acf_nottem_formato$valor_p,
+    digits = 4,
+    eps = 0.0001
+  )
+
+tabla_acf_nottem_formato$significativo <-
+  ifelse(
+    tabla_acf_nottem_formato$significativo,
+    "Sí",
+    "No"
+  )
+```
+
+```{r}
+# Visualización estilo APA
+
+kable(
+  tabla_acf_nottem_formato,
+  format = "html",
+  col.names = c(
+    "Rezago ($h$)",
+    "Autocorrelación ($r_h$)",
+    "Estadístico ($z$)",
+    "Valor $p$",
+    "Significativo"
+  ),
+  align = c("c", "c", "c", "c", "c"),
+  caption = "Contraste individual de autocorrelación — Serie de Temperatura de Nottingham"
+) |>
+  kable_styling(
+    bootstrap_options = "basic",
+    full_width = FALSE,
+    position = "center"
+  ) |>
+  row_spec(0, bold = TRUE) |>
+  row_spec(
+    1:nrow(tabla_acf_nottem_formato),
+    extra_css = "border-bottom: none;"
+  ) |>
+  column_spec(
+    1:5,
+    border_left = FALSE,
+    border_right = FALSE
+  ) |>
+  add_header_above(
+    c(" " = 5),
+    line = TRUE,
+    bold = TRUE
+  ) |>
+  row_spec(
+    nrow(tabla_acf_nottem_formato),
+    extra_css = "border-bottom: 1px solid black;"
+  )
+```
+
+Los resultados muestran que la mayoría de los rezagos presentan autocorrelaciones significativamente diferentes de cero al 5 %. En particular, los rezagos 1, 2, 4 a 8, 10 a 14, 16 a 20 y 22 a 24 son significativos, ya que sus valores p son menores que 0.05. Por el contrario, los rezagos 3, 9, 15 y 21 no presentan evidencia suficiente para rechazar la hipótesis nula de autocorrelación igual a cero.
+
+Se observa además un patrón periódico en las autocorrelaciones. Los valores son positivos en los rezagos cercanos a 1, 2, 10, 11 y 12, mientras que son negativos principalmente entre los rezagos 4 y 8. Este comportamiento vuelve a repetirse aproximadamente 12 períodos después. El rezago 12 presenta una autocorrelación positiva elevada $r_{12}=0.8843$, con un valor p menor que 0.0001, y el mismo patrón se observa nuevamente alrededor del rezago 24 $r_{24}=0.8662$.
+
+Por tanto, los contrastes individuales proporcionan evidencia de una fuerte dependencia temporal y de un comportamiento estacional con periodicidad aproximada de 12 meses en la serie de temperaturas de Nottingham. Esto es consistente con la frecuencia mensual de la serie.
+
+
+##### Ljung Box
+
+Prueba Hipótesis
+
+$$ H_0:\rho_1=\rho_2=\cdots=\rho_{24}=0 $$ 
+$$ H_1:\text{al menos una }\rho_h\neq0 $$
+
+Estadístico de Prueba
+
+$$Q = T(T + 2) \sum_{h=1}^{24} \frac{{r}_h^2}{T - h} $$
+
+Distribución
+
+$$Q \sim \chi^2_{24}$$
+
+Región de Rechazo
+
+$$Q > \chi^2_{0.95, 24}$$
+
+```{r}
+resultado_lb_nottem <- ljung_box(
+  r = cor_nottem$acf,
+  T = length(datos_nottem$y),
+  m = 24,
+  p = 0
+)
+```
+
+```{r}
+cat(
+  "Nottingham → Q =", round(resultado_lb_nottem$estadistico, 4),
+  "| gl =", resultado_lb_nottem$grados_libertad,
+  "| valor crítico =", round(resultado_lb_nottem$valor_critico, 4),
+  "| p-valor =", round(resultado_lb_nottem$valor_p, 4), "\n"
+)
+```
+El estadístico de Ljung–Box obtenido para los primeros 24 rezagos fue $Q=2342.383$, con 24 grados de libertad. Al 5% de significancia, el valor crítico es $36.415$. Como $Q=2342.383>36.415$ y el valor p es prácticamente 0, se rechaza la hipótesis nula de ausencia de autocorrelación conjunta hasta el rezago 24. Por tanto, existe evidencia estadística de una fuerte dependencia temporal en la serie de temperaturas de Nottingham. Este resultado es consistente con los contrastes individuales, que mostraron autocorrelaciones significativas en la mayoría de los rezagos, y evidencia además la presencia de un patrón estacional marcado.
+
+
+:::
+
+#### Estimación y Validación
+
+::: {.panel-tabset}
+
+##### Partición de la serie
+
+```{r}
+# Partición de la serie
+h <- min(
+  12,
+  floor(0.2 * T)
+)
+
+y_estimacion <- datos_nottem$y[1:(T - h)]
+
+y_validacion <- datos_nottem$y[(T - h + 1):T]
+
+cat(
+  "Nottingham → Estimación =", length(y_estimacion),
+  "| Validación =", length(y_validacion), "\n"
+)
+```
+La serie contiene $T=240$ observaciones. Las primeras 228 observaciones se utilizan para la estimación y las últimas 12 se reservan para validar los pronósticos del método de media simple.
+
+##### Media Móvil
+
+```{r}
+# Optimización de la ventana de la media móvil
+resultado_opt_nottem <- optimizar(
+  y = y_estimacion,
+  metodo = "mm",
+  rejilla = 2:12
+)
+```
+
+```{r}
+resultado_opt_nottem$rejilla
+```
+
+```{r}
+#Gráfica de optimización
+grafico_opt_nottem <- graficar_optimizacion(
+  resultado = resultado_opt_nottem,
+  parametro = "k",
+  titulo = "Optimización de la ventana de media móvil - Nottingham"
+)
+
+grafico_opt_nottem
+```
+El valor óptimo para la ventana es $k=2$, representado por el punto rojo, ya que presenta el menor MSE entre las ventanas evaluadas. A medida que aumenta $k$, el MSE aumenta inicialmente, lo que indica que ventanas más amplias generan mayores errores de pronóstico de un paso para esta serie. Posteriormente, el MSE disminuye nuevamente para ventanas cercanas a 12 meses, aunque no alcanza el valor obtenido con $k=2$. Por tanto, de acuerdo con el criterio de MSE utilizado en la optimización, la ventana seleccionada para la media móvil es $k=2$.
+
+
+```{r}
+# Ajuste de la media móvil con el k óptimo
+modelo_nottem <- ajustar_mm(
+  y = y_estimacion,
+  k = resultado_opt_nottem$optimo$k
+)
+
+# Pronóstico de los 12 meses de validación
+pronosticos_nottem <- modelo_nottem$pronosticar(h)
+```
+
+La media móvil con ventana óptima \(k=2\) genera un pronóstico constante de **43.5** para las 12 observaciones del período de validación. Esto se debe a que, una vez finalizado el período de estimación, el método utiliza el promedio de las dos últimas observaciones disponibles y mantiene este valor para todos los pronósticos futuros. Por tanto, el método no permite que el pronóstico cambie entre los diferentes meses del horizonte de validación.
+
+
+##### Medidas de error
+
+```{r}
+# Posiciones donde sí existe un pronóstico
+posiciones_nottem <- which(!is.na(modelo_nottem$yhat))
+
+# Medidas de estimación
+medidas_estimacion_nottem <- medidas(
+  y = y_estimacion[posiciones_nottem],
+  yhat = modelo_nottem$yhat[posiciones_nottem]
+)
+
+# Medidas de validación
+medidas_validacion_nottem <- medidas(
+  y = y_validacion,
+  yhat = pronosticos_nottem
+)
+
+# Pronóstico ingenuo estacional
+pronosticos_ingenuo_estacional_nottem <- 
+  y_estimacion[(length(y_estimacion) - 12 + 1):length(y_estimacion)]
+
+# Medidas del ingenuo estacional en validación
+medidas_ingenuo_estacional_nottem <- medidas(
+  y = y_validacion,
+  yhat = pronosticos_ingenuo_estacional_nottem
+)
+
+```
+
+```{r}
+# Escala MASE usando el ingenuo estacional en estimación
+escala_mase_nottem <- mean(
+  abs(
+    y_estimacion[13:length(y_estimacion)] -
+    y_estimacion[1:(length(y_estimacion) - 12)]
+  )
+)
+```
+
+```{r}
+#Mase de la media móvil
+mase_mm_nottem <- 
+  medidas_validacion_nottem$MAD / escala_mase_nottem
+```
+
+```{r}
+mase_ingenuo_estacional_nottem <- 
+  medidas_ingenuo_estacional_nottem$MAD / escala_mase_nottem
+```
+
+```{r}
+#Medidas
+tabla_medidas_nottem <- data.frame(
+  Tramo = c(
+    "Estimación",
+    "Validación",
+    "Validación"
+  ),
+  Método = c(
+    "Media móvil",
+    "Media móvil",
+    "Ingenuo estacional"
+  ),
+  MSE = c(
+    medidas_estimacion_nottem$MSE,
+    medidas_validacion_nottem$MSE,
+    medidas_ingenuo_estacional_nottem$MSE
+  ),
+  MAD = c(
+    medidas_estimacion_nottem$MAD,
+    medidas_validacion_nottem$MAD,
+    medidas_ingenuo_estacional_nottem$MAD
+  ),
+  MAPE = c(
+    medidas_estimacion_nottem$MAPE,
+    medidas_validacion_nottem$MAPE,
+    medidas_ingenuo_estacional_nottem$MAPE
+  ),
+  MASE = c(
+    mase_mm_estim_nottem <- medidas_estimacion_nottem$MAD / escala_mase_nottem,
+    mase_mm_nottem,
+    mase_ingenuo_estacional_nottem
+  )
+)
+
+tabla_medidas_nottem
+```
+
+En el período de estimación, la media móvil de orden 2 obtuvo un MSE de 47.02, un MAD de 5.80 °F, un MAPE de 12.03 % y un MASE de 2.11. Al ser el MASE mayor que 1, sus errores son mayores que la escala de error del ingenuo estacional utilizada como referencia.
+
+En el período de validación, correspondiente a los últimos 12 meses, la media móvil obtuvo un MSE de 102.66, un MAD de 8.14 °F, un MAPE de 15.18 % y un MASE de 2.96. Por su parte, el ingenuo estacional presentó un MSE de 4.82, un MAD de 1.70 °F, un MAPE de 3.70 % y un MASE de 0.62. Por tanto, la media móvil no supera al referente obligatorio en validación. Su MSE fue aproximadamente 21 veces mayor que el del ingenuo estacional.
+
+Este resultado se explica por la marcada estacionalidad anual de la serie. La media móvil con k = 2 utiliza únicamente las dos observaciones anteriores y, al realizar los pronósticos fuera de muestra, mantiene constante el último promedio móvil, que en este caso es de 43.5 °F. Este valor está determinado por las últimas dos observaciones del período de estimación, correspondientes a noviembre y diciembre, que son meses relativamente fríos. Por ello, el pronóstico se aleja considerablemente de las temperaturas de los meses cálidos y alcanza un error absoluto de hasta 18.3 °F en agosto.
+
+En contraste, el ingenuo estacional utiliza el valor observado 12 meses antes, por lo que incorpora directamente la repetición anual de las temperaturas. Esto explica su considerablemente menor error durante el período de validación.
+
+
+:::
+
+#### Validación de los errores
+
+```{r}
+# Errores de la media móvil en estimación
+posiciones_nottem <- which(!is.na(modelo_nottem$yhat))
+
+errores_nottem <- 
+  y_estimacion[posiciones_nottem] -
+  modelo_nottem$yhat[posiciones_nottem]
+```
+
+```{r}
+resultado_errores_nottem <- validar_errores(
+  e = errores_nottem,
+  m = NULL,
+  p = 1
+)
+```
+
+
+::: {.panel-tabset}
+
+##### Gráfico
+
+```{r}
+resultado_errores_nottem$grafico_errores
+```
+Los errores de un paso muestran un patrón oscilatorio que se repite aproximadamente cada 12 meses, lo que evidencia que existe una estructura estacional que no fue capturada adecuadamente por la media móvil de orden 2. Los errores presentan alternancia entre valores positivos y negativos y oscilan alrededor de cero, sin observarse un sesgo evidente hacia un solo lado. Sin embargo, alcanzan valores cercanos a ±15 °F, lo que muestra que la magnitud de los errores puede ser considerable.
+
+En conjunto, el gráfico sugiere que la estacionalidad anual de la serie permanece presente en los errores del modelo.
+
+
+##### Correlograma
+
+```{r}
+resultado_errores_nottem$correlograma$grafico
+```
+El ACF de los errores presenta valores fuera de las bandas de significancia en numerosos rezagos y muestra un patrón oscilatorio que se repite aproximadamente cada 12 meses. Los picos positivos más altos se encuentran alrededor de los rezagos 12 y 24, con valores cercanos a 0.8, mientras que los valores negativos más fuertes aparecen alrededor de los rezagos 6 y 18, cercanos a −0.75. Este comportamiento periódico es consistente con la presencia de una estructura estacional anual que permanece en los errores.
+
+Además, el primer rezago presenta una autocorrelación positiva elevada, cercana a 0.7, lo que indica que los errores consecutivos presentan una relación positiva importante.
+
+En el PACF también se observa un pico elevado en el primer rezago y varios valores posteriores que superan las bandas de significancia. Esto indica que existe dependencia entre los errores incluso después de controlar el efecto de los rezagos intermedios.
+
+En conjunto, el correlograma proporciona evidencia de que los errores conservan una estructura temporal y estacional importante. Por tanto, la media móvil de orden 2 no logra capturar adecuadamente la estacionalidad anual de la serie.
+
+##### Prueba t
+
+Prueba de Hipótesis
+
+$$H_0: \mu_e = 0$$
+$$H_1: \mu_e \neq 0$$
+
+Estadístico de Prueba:
+
+$$t = \frac{\bar{e}}{s_e / \sqrt{n}}$$
+
+Distribución bajo $H_0$
+$$t \sim t_{226-1} = t_{225}$$
+
+Región de Rechazo
+
+$$|t| > t_{0.975,\,225}$$
+```{r}
+cat(
+  "Estadístico de prueba:", round(resultado_errores_nottem$t, 4), "\n",
+  "Grados de libertad:", resultado_errores_nottem$grados_libertad_t, "\n",
+  "Valor crítico:", round(
+    qt(0.975, resultado_errores_nottem$grados_libertad_t), 4
+  ), "\n",
+  "Valor p:", round(resultado_errores_nottem$valor_p_t, 4), "\n"
+)
+```
+El estadístico observado fue (t=0.0194), con un valor p de (0.9846). Como (|0.0194|<1.9706) y (p=0.9846>0.05), no se rechaza (H_0).
+
+Por tanto, no existe evidencia estadística suficiente para afirmar que la media de los errores sea diferente de cero. En términos del modelo, los errores de la media móvil de orden 2 no presentan evidencia de un sesgo promedio sistemático hacia valores positivos o negativos.
+
+
+##### Ljung Box
+
+Prueba de Hipótesis
+
+$$ H_0:\rho_1=\rho_2=\cdots=\rho_{21}=0 $$ 
+$$ H_1:\text{al menos una }\rho_h\neq0 $$
+
+Estadístico de Prueba
+
+$$Q = T(T + 2) \sum_{h=1}^{24} \frac{{r}_h^2}{T - h} $$
+
+Distribución
+
+$$Q \sim \chi^2_{23}$$
+
+Región de Rechazo
+
+$$Q > \chi^2_{0.95, 23}$$
+
+```{r}
+cat(
+  "Estadístico de prueba:", round(
+    resultado_errores_nottem$ljung_box$estadistico, 4
+  ), "\n",
+  "Grados de libertad:", resultado_errores_nottem$ljung_box$grados_libertad, "\n",
+  "Valor crítico:", round(
+    resultado_errores_nottem$ljung_box$valor_critico, 4
+  ), "\n",
+  "Valor p:", round(
+    resultado_errores_nottem$ljung_box$valor_p, 4
+  ), "\n"
+)
+```
+El estadístico observado fue $Q=1752.116$, con un valor p aproximadamente igual a 0. Como 
+$1752.116>35.1725$ y $p<0.05$ se rechaza (H_0). Por tanto, existe evidencia estadística suficiente de autocorrelación conjunta en los errores de pronóstico. En términos del modelo, los errores de la media móvil de orden 2 no son compatibles con un comportamiento de ruido blanco, ya que conservan una estructura temporal significativa. Esto es consistente con el patrón estacional observado anteriormente y confirma que la media móvil de orden 2 no logra capturar adecuadamente la estacionalidad anual de la serie.
+
+##### Jarque Bera
+
+Prueba de Hipótesis
+
+$$ H_0:\text{los errores tienen distribución normal} $$ 
+
+$$ H_1:\text{los errores no tienen distribución normal} $$
+
+Distribución Bajo $H_0$:
+
+$$ JB \sim \chi^2_{2} $$
+
+Estadístico de Prueba
+
+$$JB = \frac{n}{6} \left( A^2 + \frac{(K - 3)^2}{4} \right)$$
+
+Región de rechazo
+$$ JB>\chi^2_{0.95,2} $$
+
+```{r}
+cat(
+  "Estadístico de prueba:", round(
+    resultado_errores_nottem$jarque_bera$estadistico, 4
+  ), "\n",
+  "Grados de libertad:", resultado_errores_nottem$jarque_bera$grados_libertad, "\n",
+  "Valor crítico:", round(
+    resultado_errores_nottem$jarque_bera$valor_critico, 4
+  ), "\n",
+  "Valor p:", format.pval(
+    resultado_errores_nottem$jarque_bera$valor_p,
+    digits = 4
+  ), "\n"
+)
+```
+El estadístico observado fue $JB=8.8733$, con un valor p de $0.01184$. Como $8.8733>5.9915$ y $p=0.01184<0.05$, se rechaza $H_0$.
+
+Por tanto, existe evidencia estadística suficiente para concluir que los errores de pronóstico de la media móvil de orden 2 no siguen una distribución normal. Esto indica que, además de presentar autocorrelación, los errores tienen características de distribución que se alejan de la normalidad.
+
+##### Durbin Watson
+
+Prueba de Hipótesis:
+
+$$ H_0:\rho=0 $$ $$ H_1:\rho\neq0 $$
+
+Estadístico de Prueba:
+
+$$ DW=\frac{\sum_{t=2}^{n}(e_t-e_{t-1})^2} {\sum_{t=1}^{n}e_t^2} $$
+
+
+
+```{r}
+cat(
+  "Estadístico de prueba:", round(
+    resultado_errores_nottem$durbin_watson$estadistico, 4
+  ), "\n",
+  "Grados de libertad: no aplica\n",
+  "Valor crítico: no calculado\n",
+  "Valor p: no calculado\n"
+)
+
+```
+El valor observado $DW=0.5605$ se encuentra considerablemente por debajo de 2, lo que indica evidencia descriptiva de autocorrelación positiva de primer orden en los errores. Esto es consistente con el correlograma, donde el primer rezago presenta una autocorrelación positiva elevada.
+
+:::
+
+#### Gráfico Final
+
+```{r}
+ggplot2::ggplot(
+  data.frame(
+    tiempo = 1:T,
+    real = datos_nottem$y,
+    ajuste = c(modelo_nottem$yhat, rep(NA, h)),
+    pronostico = c(rep(NA, T - h), pronosticos_nottem)
+  ),
+  ggplot2::aes(x = tiempo)
+) +
+  
+  # Serie real
+  ggplot2::geom_line(
+    ggplot2::aes(y = real),
+    color = "purple"
+  ) +
+  
+  # Ajuste de media simple
+  ggplot2::geom_line(
+    ggplot2::aes(y = ajuste),
+    color = "green"
+  ) +
+  
+  # Pronóstico
+  ggplot2::geom_line(
+    ggplot2::aes(y = pronostico),
+    color = "green"
+  ) +
+  
+  # Separación entre estimación y validación
+  ggplot2::geom_vline(
+    xintercept = T - h,
+    color = "red",
+    linetype = "dashed"
+  ) +
+  
+  ggplot2::labs(
+    title = "Temperatura Nottingham: ajuste y pronóstico de media móvil",
+    x = "Tiempo",
+    y = "Temperatura (°F)"
+  ) +
+  
+  ggplot2::theme_minimal()
+```
+
+Este gráfico compara las temperaturas reales de Nottingham, representadas por la línea morada, con una media móvil de dos periodos, representada por la línea verde. En la parte histórica, la línea verde sigue relativamente de cerca a la morada porque, al utilizar una ventana de solo dos datos, el suavizamiento es reducido y se mantienen gran parte de los picos y valles de la serie.
+
+Al pasar la línea roja punteada entramos en la etapa de pronóstico, donde se observa la principal limitación del método en este caso: en lugar de reproducir las subidas y bajadas estacionales de la temperatura, el pronóstico permanece constante y forma una línea horizontal. Esto ocurre porque, para los pronósticos fuera de muestra, la media móvil utiliza el último promedio disponible y lo mantiene constante para todo el horizonte. Por tanto, aunque el método sigue parcialmente la serie durante el período histórico, no logra representar adecuadamente el patrón estacional anual de Nottingham en el período de validación.
+
+#### Conclusión
+
+La serie de temperaturas de Nottingham se ajustó mediante una **media móvil de orden k=2**, seleccionado mediante optimización por MSE de un paso, con un MSE de **47.02** en el período de estimación. En el período de validación de **12 meses**, la media móvil obtuvo un MSE de **102.66**, un MAD de **8.14 °F**, un MAPE de **15.18 %** y un MASE de **2.96**, mientras que el ingenuo estacional obtuvo un MSE de **4.82**, un MAD de **1.70 °F**, un MAPE de **3.70 %** y un MASE de **0.62**. Por tanto, la media móvil no superó al referente estacional. La validación de los errores mostró un estadístico $t=0.0194$ con $p=0.9846$, por lo que no se encontró evidencia de sesgo en la media de los errores, pero el Ljung–Box presentó $Q=1752.116$, $gl=23$ y $p<0.001$, evidenciando autocorrelación en los errores. Además, la prueba de Jarque–Bera produjo $JB=8.8733$, $gl=2$ y $p=0.01184$, proporcionando evidencia contra la normalidad de los errores. El estadístico Durbin–Watson fue **0.5605**, consistente descriptivamente con autocorrelación positiva de primer orden.
+
+Este pronóstico podría servirle a un **usuario que necesite una estimación sencilla de la temperatura para los próximos pocos períodos**, como referencia rápida en actividades de planificación que no requieran representar explícitamente la estacionalidad. Se recomienda utilizarlo únicamente para un **horizonte corto, inferior a un ciclo anual de 12 meses**, y con precaución, debido a que el método no reproduce adecuadamente el patrón estacional de la serie. Esta limitación se evidencia en que, para el horizonte de validación de **12 meses**, el MSE de la media móvil fue **102.66**, aproximadamente **21 veces** el MSE de **4.82** del ingenuo estacional, y sus pronósticos permanecieron constantes en **43.5 °F**.
+
+#### Comparación con otro método
+
+:::
+
+
+
+
+
