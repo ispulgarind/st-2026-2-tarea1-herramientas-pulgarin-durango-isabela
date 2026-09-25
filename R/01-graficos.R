@@ -3,7 +3,7 @@ graficar_serie <- function(datos, titulo) {
   
   ggplot2::ggplot(datos, ggplot2::aes(x = fecha, y = y)) +
     
-    ggplot2::geom_line() +
+    ggplot2::geom_line(color = "purple") +
     
     ggplot2::labs(
       title = titulo,
@@ -109,7 +109,7 @@ correlograma <- function(datos, m = NULL) {
         xend = rezago,
         y = 0,
         yend = valor
-      )
+      ), color = "purple"
     ) +
     ggplot2::labs(
       title = "ACF",
@@ -134,7 +134,7 @@ correlograma <- function(datos, m = NULL) {
         xend = rezago,
         y = 0,
         yend = valor
-      )
+      ), color = "purple"
     ) +
     ggplot2::labs(
       title = "PACF",
@@ -164,5 +164,95 @@ correlograma <- function(datos, m = NULL) {
 }
 
 
+# UNIR SERIE, ACF Y PACF
+
+panel_diagnostico <- function(grafico_serie, resultado_cor) {
+  
+  grafico_acf <- resultado_cor$grafico[[1]]
+  grafico_pacf <- resultado_cor$grafico[[2]]
+  
+  panel <- (
+    grafico_serie |
+      (grafico_acf / grafico_pacf)
+  )
+  
+  return(panel)
+}
+
+
+
+# GRÁFICA DE OPTIMIZACIÓN
+
+graficar_optimizacion <- function(resultado, parametro, titulo) {
+  
+  grafico <- ggplot2::ggplot(
+    resultado$rejilla,
+    ggplot2::aes(
+      x = .data[[parametro]],
+      y = MSE
+    )
+  ) +
+    ggplot2::geom_line(
+      color = "purple"
+    ) +
+    ggplot2::geom_point(
+      color = "purple"
+    ) +
+    ggplot2::geom_point(
+      data = resultado$optimo,
+      ggplot2::aes(
+        x = .data[[parametro]],
+        y = MSE
+      ),
+      color = "red",
+      size = 4
+    ) +
+    ggplot2::labs(
+      title = titulo,
+      x = parametro,
+      y = "MSE"
+    ) +
+    ggplot2::theme_minimal()
+  
+  return(grafico)
+}
+
+
+# MAPA DE OPTIMIZACIÓN DE HOLT
+
+graficar_holt <- function(resultado) {
+  
+  grafico <- ggplot2::ggplot(
+    resultado$rejilla,
+    ggplot2::aes(
+      x = alpha,
+      y = beta,
+      fill = MSE
+    )
+  ) +
+    ggplot2::geom_tile() +
+    ggplot2::scale_fill_gradient(
+      low = "lavender",
+      high = "purple"
+    ) +
+    ggplot2::geom_point(
+      data = resultado$optimo,
+      ggplot2::aes(
+        x = alpha,
+        y = beta
+      ),
+      color = "red",
+      size = 4
+    ) +
+    ggplot2::labs(
+      title = "MSE según alpha y beta - Holt",
+      x = "alpha",
+      y = "beta",
+      fill = "MSE"
+    ) +
+    ggplot2::theme_minimal()
+  
+  return(grafico)
+}
 
 

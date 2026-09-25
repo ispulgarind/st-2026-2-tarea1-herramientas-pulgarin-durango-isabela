@@ -714,4 +714,148 @@ ajustar_holt <- function(y, alpha, beta) {
 
 
 
+# OPTIMIZACIÓN DE CONSTANTES Y VENTANAS
+
+optimizar <- function(y, metodo, rejilla) {
+  
+  stopifnot(is.numeric(y))
+  stopifnot(is.character(metodo))
+  
+  if (any(is.na(y))) {
+    stop("La serie contiene valores faltantes.")
+  }
+  
+  if (length(y) < 2) {
+    stop("Se necesitan al menos 2 observaciones.")
+  }
+  
+  
+  # MEDIA MÓVIL
+  
+  if (metodo == "mm") {
+    
+    resultados <- data.frame(
+      k = rejilla,
+      MSE = NA_real_
+    )
+    
+    for (i in 1:length(rejilla)) {
+      
+      k <- rejilla[i]
+      
+      # k debe permitir al menos un pronóstico
+      if (k < length(y)) {
+        
+        modelo <- ajustar_mm(y, k)
+        
+        posiciones <- which(!is.na(modelo$yhat))
+        
+        errores <- y[posiciones] - modelo$yhat[posiciones]
+        
+        resultados$MSE[i] <- mean(errores^2)
+      }
+    }
+  }
+  
+  
+  # DOBLE MEDIA MÓVIL
+  
+  else if (metodo == "dmm") {
+    
+    resultados <- data.frame(
+      k = rejilla,
+      MSE = NA_real_
+    )
+    
+    for (i in 1:length(rejilla)) {
+      
+      k <- rejilla[i]
+      
+      if (2 * k - 1 <= length(y)) {
+        
+        modelo <- ajustar_dmm(y, k)
+        
+        posiciones <- which(!is.na(modelo$yhat))
+        
+        errores <- y[posiciones] - modelo$yhat[posiciones]
+        
+        resultados$MSE[i] <- mean(errores^2)
+      }
+    }
+  }
+  
+  
+  # SUAVIZAMIENTO EXPONENCIAL SIMPLE
+  
+  else if (metodo == "ses") {
+    
+    resultados <- data.frame(
+      alpha = rejilla,
+      MSE = NA_real_
+    )
+    
+    for (i in 1:length(rejilla)) {
+      
+      alpha <- rejilla[i]
+      
+      modelo <- ajustar_ses(y, alpha)
+      
+      posiciones <- which(!is.na(modelo$yhat))
+      
+      errores <- y[posiciones] - modelo$yhat[posiciones]
+      
+      resultados$MSE[i] <- mean(errores^2)
+    }
+  }
+  
+  
+  # HOLT LINEAL
+  
+  else if (metodo == "holt") {
+    
+    # Crear todas las combinaciones de alpha y beta
+    resultados <- expand.grid(
+      alpha = rejilla,
+      beta = rejilla
+    )
+    
+    resultados$MSE <- NA_real_
+    
+    for (i in 1:nrow(resultados)) {
+      
+      alpha <- resultados$alpha[i]
+      beta <- resultados$beta[i]
+      
+      modelo <- ajustar_holt(
+        y,
+        alpha,
+        beta
+      )
+      
+      posiciones <- which(!is.na(modelo$yhat))
+      
+      errores <- y[posiciones] - modelo$yhat[posiciones]
+      
+      resultados$MSE[i] <- mean(errores^2)
+    }
+  }
+  
+  
+  else {
+    stop("Método no reconocido.")
+  }
+  
+  posicion <- which.min(resultados$MSE)
+  
+  optimo <- resultados[posicion, ]
+  
+  
+  return(
+    list(
+      rejilla = resultados,
+      optimo = optimo
+    )
+  )
+}
+
 
